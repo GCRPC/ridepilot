@@ -1,0 +1,9 @@
+Customers
+%span.trips-quantity.header-info
+  - stats = []
+  - total_count = @lite_customers.count
+  - stats << "Total Customers #{total_count}" if total_count > 0
+  - if total_count > 0
+    = "#{stats.join(', ')}"
+  - else 
+    = translate_helper(:empty_trips)

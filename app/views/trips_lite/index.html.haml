@@ -1,0 +1,30 @@
+:css
+  table td p {
+    line-height: normal;
+    margin: 0px;
+  }
+
+= render 'shared/highlight_active_tab_js', is_primary_nav: true, tab_class: 'dispatchers'
+.col-md-3{style: 'padding: 0px 15px 0px 0px;'}
+  = render :partial => 'filters'
+.col-md-9
+  .col-md-6{style: 'padding: 0px;'}
+    -#.table-action-buttons.cancel-selected-trips.dropdown
+      %button.btn.btn-primary.dropdown-toggle{type: 'button', data: {toggle: 'dropdown'}}
+        =translate_helper(:change_selected_trips_result)
+        %span.caret
+      %ul.dropdown-menu
+        %li
+          %a{href: '#', 'data-trip-result-id' => "" }
+            No Result (Pending)
+        -@trip_results.each do |tr|
+          %li
+            %a{href: '#', 'data-trip-result-id' => tr[1] }
+              =tr[0]
+      = link_to "Report", report_trips_path, class: 'btn action-button'
+  .col-md-6{style: 'padding: 0px;'}
+  = render 'lite/lite_trips/panel'
+  = render 'lite/lite_incidental_trips/panel'
+  = render 'lite/lite_customers/panel'
+  = render 'lite/lite_unique_riders/panel'
+  = will_paginate @lite_customers

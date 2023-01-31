@@ -38,6 +38,27 @@
     });
   }
 
+  function makeLiteDatePickers(selector, show_buttons) {
+      show_buttons = show_buttons || true;
+      selector = selector || '.date-picker';
+      $(selector).datepicker({
+          showOn: 'both',
+          buttonImage: "<%=  image_path 'calendar-clock.png' %>",
+          buttonImageOnly: true,
+          constrainInput: false,
+          dateFormat: 'mm/dd/yy',
+          showButtonPanel: show_buttons,
+          closeText: 'Clear', // Text to show for "close" button
+          onClose: function () {
+              var event = arguments.callee.caller.caller.arguments[0];
+              // If "Clear" gets clicked, then really clear it
+              if ($(event.delegateTarget).hasClass('ui-datepicker-close')) {
+                  $(this).val('');
+              }
+          }
+      });
+  }
+
   function makeTimePickers(selector) {
     selector = selector || '.time-picker';
     $(selector).timepicker({

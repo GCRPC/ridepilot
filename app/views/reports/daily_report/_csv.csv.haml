@@ -1,0 +1,12 @@
+- # common
+= render 'reports/common_csv_header.csv.haml'
+
+- if @vehicles
+  - daily_report_headers = ["Date", "One-Way Trips", "Seniors", "Disabled", "Vehicle", "Start Odometer", "End Odometer", "Lift Odometer", "Pre-Trip"]
+
+  - unless @lite_trips.blank?
+    = CSV.generate_line(daily_report_headers, {:row_sep => nil}).html_safe
+  - else
+    = CSV.generate_line(["No record"], {:row_sep => nil}).html_safe
+  - @lite_trips.each do |trip|
+    = CSV.generate_line([format_date(trip.trip_date), trip.num_one_way_trips, trip.num_senior_trips, trip.num_disabled_trips, trip.vehicle.name, trip.start_odometer, trip.end_odometer, trip.lift_odometer, trip.pre_trip_inspection], {:row_sep => nil}).html_safe

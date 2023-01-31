@@ -1,5 +1,5 @@
 
-%h2 Number of Passengers Summary
+%h2 Number of Trips Summary
 %table.table.table-bordered
   %thead
     %tr
@@ -7,11 +7,11 @@
       %th Count
   %tbody
     %tr
+      %td One-Way
+      %td= @total_one_way_passengers_count
+    %tr
       %td Senior
       %td= @total_senior_passengers_count
-    %tr
-      %td Low Income
-      %td= @total_low_income_passengers_count
     %tr
       %td Disabled
       %td= @total_disabled_passengers_count
@@ -66,7 +66,7 @@
           = vehicle.active_status_changed_reason
 
   
-    %h4 Number of Passengers
+    %h4 Number of Trips
     %table.table.table-bordered
       %thead
         %tr
@@ -74,11 +74,11 @@
           %th Count
       %tbody
         %tr
+          %td One-Way
+          %td= @one_way_passengers_count[vehicle.id]
+        %tr
           %td Senior
           %td= @senior_passengers_count[vehicle.id]
-        %tr
-          %td Low Income
-          %td= @low_income_passengers_count[vehicle.id]
         %tr
           %td Disabled
           %td= @disabled_passengers_count[vehicle.id]

@@ -194,6 +194,7 @@ en:
   log_message: 'Message'
   #Shared
   site_title: "RidePilot"
+  site_title_lite: "RidePilot Lite"
   new_trip: "New Trip"
   new_repeating_trip: "New Subscription Trip"
   repeating_trips: "View Subscription Trip Templates"
@@ -707,6 +708,7 @@ en:
   footer_content: "Footer content here."
   #application layout
   application_title: "RidePilot"
+  application_title_lite: "RidePilot Lite"
   session_timeout_message: "You will be logged off shortly due to inactivity.  <a id='session-resume' href='#'>Click here to stay logged in.</a>"
   logo_text: "RidePilot"
   log_out_link_text: "Log out"
@@ -1470,11 +1472,15 @@ en:
   edit_vehicle_button: "Edit Vehicle"
   delete_vehicle_button: "Delete Vehicle"
   add_maintenance_link_text: "Add Maintenance Event"
+  add_maintenance_link_text_lite: "Add Repairs and Unscheduled Maintenance Event"
   edit_vehicle_link_text: "Edit Vehicle"
   index_vehicle_heading: "Vehicles"
   vehicle_maintenance_events_heading: "Maintenance Events"
+  vehicle_maintenance_events_heading_lite: "Repairs and Unscheduled Maintenance"
   vehicle_maintenance_events_empty: "There are no maintenance events"
+  vehicle_maintenance_events_empty_lite: "There is no unscheduled maintenance"
   vehicle_maintenance_event_add_link_title: "Add Maintenance Event"
+  vehicle_maintenance_event_add_link_title_lite: "Add maintenance event"
   vehicle_maintenance_event_delete_confirm: "Are you sure?"
   edit_vehicle_initial_mileage_heading: "Change initial mileage"
   vehicle_form_initial_mileage_change_reason: "Reason"
@@ -1524,6 +1530,7 @@ en:
 
   # Vehicle Maintenance Compliances
   vehicle_maintenance_compliances_heading: "Preventive Maintenance Logs (PM)"
+  vehicle_maintenance_compliances_heading_lite: "Scheduled Maintenance"
   vehicle_maintenance_compliances_add_link_title: "Add compliance event"
   vehicle_maintenance_compliances_empty: "No compliance events exist for this vehicle"
   vehicle_maintenance_compliance_delete_confirm: "Are you sure you want to delete this compliance event?"

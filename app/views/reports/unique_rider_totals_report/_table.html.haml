@@ -1,0 +1,17 @@
+%h2= translate_helper(:summary)
+%table.table.table-bordered
+  %thead
+    %tr
+      %th Year
+      %th Number of Unique Riders
+
+  %tbody
+    - @lite_unique_riders.each do |trip|
+      %tr{data: {trip_id: trip.id}}
+        %td= trip.year
+        %td= trip.num_unique_riders
+
+
+
+
+

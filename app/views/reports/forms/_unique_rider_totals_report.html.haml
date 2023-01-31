@@ -1,0 +1,9 @@
+:ruby
+  action_name = @saved_report ? :show_saved_report : @custom_report.name
+  @active_vehicles ||= Vehicle.is_5310_reportable.for_provider(current_provider_id).active.default_order
+
+= form_for @query, :url=>url_for(:action=>action_name), :html=>{:method=>:get} do |f| 
+  %fieldset
+
+    = render 'reports/forms/v2_reports/common_controls', has_multiple_report_types: true, f: f
+    = render 'reports/forms/save_report_controls', custom_report_id: @custom_report.id

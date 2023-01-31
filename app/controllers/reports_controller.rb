@@ -1066,25 +1066,29 @@ class ReportsController < ApplicationController
       end
       vehicle_ids = @vehicles.pluck(:id)
 
+      lite_trips = LiteTrip.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+
       # Only past runs with odometers
       @runs = Run.with_odometer_readings.today_and_prior.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
       run_trips = @runs.joins(:trips).where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
       # Total passenger count
-      @total_passengers_count = run_trips.sum("customer_space_count + guest_count + attendant_count")
-      @total_senior_passengers_count = run_trips.sum(:number_of_senior_passengers_served)
-      @total_disabled_passengers_count = run_trips.sum(:number_of_disabled_passengers_served)
-      @total_low_income_passengers_count = run_trips.sum(:number_of_low_income_passengers_served)
+      @total_passengers_count = lite_trips.sum("coalesce(num_one_way_trips, 0) + coalesce(num_senior_trips, 0) + coalesce(num_disabled_trips, 0)")
+      @total_one_way_passengers_count = lite_trips.sum(:num_one_way_trips)
+      @total_senior_passengers_count = lite_trips.sum(:num_senior_trips)
+      @total_disabled_passengers_count = lite_trips.sum(:num_disabled_trips)
+      #@total_low_income_passengers_count = run_trips.sum(:number_of_low_income_passengers_served)
 
       if query_params[:report_type] == 'summary'
         @is_summary_report = true
       else
         # stats
-        @passengers_count = run_trips.group(:vehicle_id).sum("customer_space_count + guest_count + attendant_count")
-        @senior_passengers_count = run_trips.group(:vehicle_id).sum(:number_of_senior_passengers_served)
-        @disabled_passengers_count = run_trips.group(:vehicle_id).sum(:number_of_disabled_passengers_served)
+        @passengers_count = lite_trips.group(:vehicle_id).sum("coalesce(num_one_way_trips, 0) + coalesce(num_senior_trips, 0) + coalesce(num_disabled_trips, 0)")
+        @one_way_passengers_count = lite_trips.group(:vehicle_id).sum(:num_one_way_trips)
+        @senior_passengers_count = lite_trips.group(:vehicle_id).sum(:num_senior_trips)
+        @disabled_passengers_count = lite_trips.group(:vehicle_id).sum(:num_disabled_trips)
         @low_income_passengers_count = run_trips.group(:vehicle_id).sum(:number_of_low_income_passengers_served)
-        @miles_by_vehicle = @runs.group(:vehicle_id).sum("(end_odometer - start_odometer)")
-        @run_last_complete_dates = @runs.group(:vehicle_id).pluck(:vehicle_id, "max(runs.date)").to_h
+        @miles_by_vehicle = lite_trips.group(:vehicle_id).sum("(end_odometer - start_odometer)")
+        @run_last_complete_dates = lite_trips.group(:vehicle_id).pluck(:vehicle_id, "max(lite_trips.trip_date)").to_h
 
         # compliances
         base_compliances = VehicleCompliance.for_vehicle(vehicle_ids).due_date_range(@query.start_date, @query.end_date).default_order
@@ -1116,17 +1120,20 @@ class ReportsController < ApplicationController
         @vehicles = @active_vehicles
       end
 
+      lite_trips = LiteTrip.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+      @total_one_way_trips = lite_trips.sum("num_one_way_trips")
+
       # Only past runs with odometers
       @runs = Run.with_odometer_readings.today_and_prior.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
 
-      @service_vehicles = Vehicle.where(id: @runs.pluck(:vehicle_id).uniq) # vehicles that provided service
+      @service_vehicles = Vehicle.where(id: lite_trips.pluck(:vehicle_id).uniq) # vehicles that provided service
       @total_vehicle_count = @service_vehicles.count
-      @total_vehicle_miles = @runs.sum("(end_odometer - start_odometer)")
-      @miles_by_vehicle = @runs.group(:vehicle_id).sum("(end_odometer - start_odometer)")
+      @total_vehicle_miles = lite_trips.sum("(end_odometer - start_odometer)")
+      @miles_by_vehicle = lite_trips.group(:vehicle_id).sum("(end_odometer - start_odometer)")
       @vehicle_hours = @runs.group(:vehicle_id).sum("extract(epoch from (scheduled_end_time - scheduled_start_time))")
       @total_vehicle_hours = @runs.total_scheduled_hours
       run_trips = @runs.joins(:trips).where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
-      @trips_count = run_trips.group(:vehicle_id).count
+      @trips_count = lite_trips.group(:vehicle_id).sum("num_one_way_trips")
       @total_trips_count = run_trips.count
       # Total passenger count
       @passengers_count = run_trips.group(:vehicle_id).sum("customer_space_count + guest_count + attendant_count")
@@ -1135,41 +1142,47 @@ class ReportsController < ApplicationController
       if query_params[:report_type] == 'summary'
         @is_summary_report = true
       else
-        @run_dates = @runs.pluck(:date).uniq.sort
+        @run_dates = lite_trips.pluck(:trip_date).uniq.sort
         @vehicles_basic_data = @service_vehicles.pluck(:id, :name)
         # by day and vehicle, and day total
         # mileage, number of trips, begining & ending mileage, revenue and non-revenue miles
         @report_data = {}
         @report_data_totals = {}
-        @runs.joins(:trips, "left join run_distances on run_distances.run_id = runs.id")
-          .where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
-          .select(:date, :vehicle_id)
-          .select("count(trips.id) as trips_count", "SUM(runs.end_odometer - runs.start_odometer)/ count(trips.id) as mileage")
+        #@runs.joins(:trips, "left join run_distances on run_distances.run_id = runs.id")
+        #.where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
+        #   .select(:date, :vehicle_id)
+        #   .select("count(trips.id) as trips_count", "SUM(runs.end_odometer - runs.start_odometer)/ count(trips.id) as mileage")
+        #   .select("min(start_odometer) as beginning_mileage", "max(end_odometer) as ending_mileage")
+        #      .select("sum(run_distances.revenue_miles) / count(trips.id) as revenue_miles_sum", "sum(run_distances.non_revenue_miles) / count(trips.id) as non_revenue_miles_sum")
+        #     .group(:date, :vehicle_id).each do |run_data|
+        lite_trips.select(:trip_date, :vehicle_id)
+          .select("count(lite_trips.id) as trips_count")
+          .select("(max(end_odometer) - min(start_odometer)) as mileage")
           .select("min(start_odometer) as beginning_mileage", "max(end_odometer) as ending_mileage")
-          .select("sum(run_distances.revenue_miles) / count(trips.id) as revenue_miles_sum", "sum(run_distances.non_revenue_miles) / count(trips.id) as non_revenue_miles_sum")
-          .group(:date, :vehicle_id).each do |run_data|
-          date = run_data.date
+          .select("SUM(num_one_way_trips) as num_one_way_trips")
+          .group(:trip_date, :vehicle_id).each do |run_data|
+          date = run_data.trip_date
           @report_data[date] = {} unless @report_data.has_key?(date)
           @report_data_totals[date] = {
             mileage: 0,
-            trips_count: 0,
-            revenue_miles_sum: nil,
-            non_revenue_miles_sum: nil
+            num_one_way_trips: 0,
+            #revenue_miles_sum: nil,
+            #non_revenue_miles_sum: nil
           } unless @report_data_totals.has_key?(date)
 
           @report_data[date][run_data.vehicle_id] = {
             mileage: run_data.mileage,
-            trips_count: run_data.trips_count,
+            num_one_way_trips: run_data.num_one_way_trips,
             beginning_mileage: run_data.beginning_mileage,
             ending_mileage: run_data.ending_mileage,
-            revenue_miles_sum: run_data.revenue_miles_sum,
-            non_revenue_miles_sum: run_data.non_revenue_miles_sum
+            #revenue_miles_sum: run_data.revenue_miles_sum,
+            #non_revenue_miles_sum: run_data.non_revenue_miles_sum
           }
 
           @report_data_totals[date][:mileage] += run_data.mileage.to_f
-          @report_data_totals[date][:trips_count] += run_data.trips_count.to_i
-          @report_data_totals[date][:revenue_miles_sum] = @report_data_totals[date][:revenue_miles_sum].to_f +  run_data.revenue_miles_sum.to_f if run_data.revenue_miles_sum
-          @report_data_totals[date][:non_revenue_miles_sum] = @report_data_totals[date][:non_revenue_miles_sum].to_f + run_data.non_revenue_miles_sum.to_f if run_data.non_revenue_miles_sum
+          @report_data_totals[date][:num_one_way_trips] += run_data.num_one_way_trips.to_i
+          #@report_data_totals[date][:revenue_miles_sum] = @report_data_totals[date][:revenue_miles_sum].to_f +  run_data.revenue_miles_sum.to_f if run_data.revenue_miles_sum
+          #@report_data_totals[date][:non_revenue_miles_sum] = @report_data_totals[date][:non_revenue_miles_sum].to_f + run_data.non_revenue_miles_sum.to_f if run_data.non_revenue_miles_sum
 
         end
 
@@ -1319,6 +1332,251 @@ class ReportsController < ApplicationController
     apply_v2_response
   end
 
+  # Lite Reports
+
+  def one_way_trips_report
+    query_params = params[:query] || {start_date: Date.today.prev_month + 1, end_date: Date.today + 1}
+    @query = Query.new(query_params)
+    @active_vehicles = Vehicle.where(reportable: true).for_provider(current_provider_id).active.default_order
+
+    if params[:query]
+      @report_params = [["Provider", current_provider.name]]
+      @report_params << ["Date Range", "#{@query.start_date.strftime('%m/%d/%Y')} - #{@query.before_end_date.strftime('%m/%d/%Y')}"]
+
+      unless @query.vehicle_id.blank?
+        @vehicles = Vehicle.where(id: @query.vehicle_id)
+      else
+        @vehicles = @active_vehicles
+      end
+
+      @lite_trips = LiteTrip.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+      @total_one_way_trips = @lite_trips.sum("num_one_way_trips")
+
+      # Only past runs with odometers
+      @runs = Run.with_odometer_readings.today_and_prior.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+
+      @service_vehicles = Vehicle.where(id: @lite_trips.pluck(:vehicle_id).uniq) # vehicles that provided service
+      @total_vehicle_count = @service_vehicles.count
+      @total_vehicle_miles = @lite_trips.sum("(end_odometer - start_odometer)")
+      @miles_by_vehicle = @lite_trips.group(:vehicle_id).sum("(end_odometer - start_odometer)")
+      @vehicle_hours = @runs.group(:vehicle_id).sum("extract(epoch from (scheduled_end_time - scheduled_start_time))")
+      @total_vehicle_hours = @runs.total_scheduled_hours
+      run_trips = @runs.joins(:trips).where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
+      @trips_count = @lite_trips.group(:vehicle_id).sum("num_one_way_trips")
+      @total_trips_count = run_trips.count
+      # Total passenger count
+      @passengers_count = run_trips.group(:vehicle_id).sum("customer_space_count + guest_count + attendant_count")
+      @total_passengers_count = run_trips.sum("customer_space_count + guest_count + attendant_count")
+
+      if query_params[:report_type] == 'summary'
+        @is_summary_report = true
+      else
+        @run_dates = @lite_trips.pluck(:trip_date).uniq.sort
+        @vehicles_basic_data = @service_vehicles.pluck(:id, :name)
+        # by day and vehicle, and day total
+        # mileage, number of trips, begining & ending mileage, revenue and non-revenue miles
+        @report_data = {}
+        @report_data_totals = {}
+        #        @runs.joins(:trips, "left join run_distances on run_distances.run_id = runs.id")
+        #     .where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
+        #     .select(:date, :vehicle_id)
+        #     .select("count(trips.id) as trips_count", "SUM(runs.end_odometer - runs.start_odometer)/ count(trips.id) as mileage")
+        #     .select("min(start_odometer) as beginning_mileage", "max(end_odometer) as ending_mileage")
+        #     .select("sum(run_distances.revenue_miles) / count(trips.id) as revenue_miles_sum", "sum(run_distances.non_revenue_miles) / count(trips.id) as non_revenue_miles_sum")
+        #     .group(:date, :vehicle_id).each do |run_data|
+        @lite_trips.select(:trip_date, :vehicle_id)
+                  .select("count(lite_trips.id) as trips_count")
+                  .select("(max(end_odometer) - min(start_odometer)) as mileage")
+                  .select("min(start_odometer) as beginning_mileage", "max(end_odometer) as ending_mileage")
+                  .select("SUM(num_one_way_trips) as num_one_way_trips")
+                  .select("SUM(num_senior_trips) as num_senior_trips")
+                  .select("SUM(num_disabled_trips) as num_disabled_trips")
+                  .group(:trip_date, :vehicle_id).each do |run_data|
+          date = run_data.trip_date
+          @report_data[date] = {} unless @report_data.has_key?(date)
+          @report_data_totals[date] = {
+            mileage: 0,
+            num_one_way_trips: 0,
+            num_senior_trips: 0,
+            num_disabled_trips: 0
+          } unless @report_data_totals.has_key?(date)
+
+          @report_data[date][run_data.vehicle_id] = {
+            mileage: run_data.mileage,
+            num_one_way_trips: run_data.num_one_way_trips,
+            beginning_mileage: run_data.beginning_mileage,
+            ending_mileage: run_data.ending_mileage,
+            num_senior_trips: run_data.num_senior_trips,
+            num_disabled_trips: run_data.num_disabled_trips
+          }
+
+          @report_data_totals[date][:mileage] += run_data.mileage.to_f
+          @report_data_totals[date][:num_one_way_trips] += run_data.num_one_way_trips.to_i
+          @report_data_totals[date][:num_senior_trips] = @report_data_totals[date][:num_senior_trips].to_i +  run_data.num_senior_trips.to_i if run_data.num_senior_trips
+          @report_data_totals[date][:num_disabled_trips] = @report_data_totals[date][:num_disabled_trips].to_i + run_data.num_disabled_trips.to_i if run_data.num_disabled_trips
+
+        end
+
+      end
+    end
+    apply_v2_response
+    end
+
+
+
+    def daily_report
+      query_params = params[:query] || {start_date: Date.today.prev_month + 1, end_date: Date.today + 1}
+      @query = Query.new(query_params)
+      @active_vehicles = Vehicle.where(reportable: true).for_provider(current_provider_id).active.default_order
+
+      if params[:query]
+        @report_params = [["Provider", current_provider.name]]
+        @report_params << ["Date Range", "#{@query.start_date.strftime('%m/%d/%Y')} - #{@query.before_end_date.strftime('%m/%d/%Y')}"]
+
+        unless @query.vehicle_id.blank?
+          @vehicles = Vehicle.where(id: @query.vehicle_id)
+        else
+          @vehicles = @active_vehicles
+        end
+
+        @lite_trips = LiteTrip.joins(:vehicle).for_provider(current_provider_id).
+          for_date_range(@query.start_date, @query.end_date).order('trip_date, vehicles.name')
+
+        if query_params[:report_type] == 'summary'
+          @is_summary_report = true
+        else
+
+        end
+      end
+
+      apply_v2_response
+    end
+
+  def incidental_trips_report
+    query_params = params[:query] || {start_date: Date.today.prev_month + 1, end_date: Date.today + 1}
+    @query = Query.new(query_params)
+    @active_vehicles = Vehicle.where(reportable: true).for_provider(current_provider_id).active.default_order
+
+    if params[:query]
+      @report_params = [["Provider", current_provider.name]]
+      @report_params << ["Date Range", "#{@query.start_date.strftime('%m/%d/%Y')} - #{@query.before_end_date.strftime('%m/%d/%Y')}"]
+
+      unless @query.vehicle_id.blank?
+        @vehicles = Vehicle.where(id: @query.vehicle_id)
+      else
+        @vehicles = @active_vehicles
+      end
+
+      lite_trips = LiteIncidentalTrip.for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+      @total_incidental_trips = lite_trips.sum("num_trips")
+
+      # Only past runs with odometers
+      @runs = Run.with_odometer_readings.today_and_prior.for_provider(current_provider_id).for_vehicle(@vehicles.pluck(:id)).for_date_range(@query.start_date, @query.end_date)
+
+      @service_vehicles = Vehicle.where(id: lite_trips.pluck(:vehicle_id).uniq) # vehicles that provided service
+      @total_vehicle_count = @service_vehicles.count
+      @total_vehicle_miles = lite_trips.sum("total_mileage")
+      @miles_by_vehicle = lite_trips.group(:vehicle_id).sum("total_mileage")
+      @vehicle_hours = @runs.group(:vehicle_id).sum("extract(epoch from (scheduled_end_time - scheduled_start_time))")
+      @total_vehicle_hours = @runs.total_scheduled_hours
+      run_trips = @runs.joins(:trips).where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
+      @trips_count = lite_trips.group(:vehicle_id).sum("num_trips")
+      @total_trips_count = run_trips.count
+      # Total passenger count
+      @passengers_count = run_trips.group(:vehicle_id).sum("customer_space_count + guest_count + attendant_count")
+      @total_passengers_count = run_trips.sum("customer_space_count + guest_count + attendant_count")
+
+      if query_params[:report_type] == 'summary'
+        @is_summary_report = true
+      else
+        @run_dates = lite_trips.pluck(:trip_date).uniq.sort
+        @vehicles_basic_data = @service_vehicles.pluck(:id, :name)
+        # by day and vehicle, and day total
+        # mileage, number of trips, begining & ending mileage, revenue and non-revenue miles
+        @report_data = {}
+        @report_data_totals = {}
+        #        @runs.joins(:trips, "left join run_distances on run_distances.run_id = runs.id")
+        #     .where("trips.trip_result_id is NULL or trips.trip_result_id = ?", TripResult.find_by_code('COMP').try(:id))
+        #     .select(:date, :vehicle_id)
+        #     .select("count(trips.id) as trips_count", "SUM(runs.end_odometer - runs.start_odometer)/ count(trips.id) as mileage")
+        #     .select("min(start_odometer) as beginning_mileage", "max(end_odometer) as ending_mileage")
+        #     .select("sum(run_distances.revenue_miles) / count(trips.id) as revenue_miles_sum", "sum(run_distances.non_revenue_miles) / count(trips.id) as non_revenue_miles_sum")
+        #     .group(:date, :vehicle_id).each do |run_data|
+        lite_trips.select(:trip_date, :vehicle_id)
+                  .select("count(lite_incidental_trips.id) as trips_count", "SUM(total_mileage) as mileage")
+                  .select("min(total_mileage) as beginning_mileage", "max(total_mileage) as ending_mileage")
+                  .select("SUM(num_trips) as num_trips")
+                  .group(:trip_date, :vehicle_id).each do |run_data|
+          date = run_data.trip_date
+          @report_data[date] = {} unless @report_data.has_key?(date)
+          @report_data_totals[date] = {
+            mileage: 0,
+            num_trips: 0
+          } unless @report_data_totals.has_key?(date)
+
+          @report_data[date][run_data.vehicle_id] = {
+            mileage: run_data.mileage,
+            num_trips: run_data.num_trips
+          }
+
+          @report_data_totals[date][:mileage] += run_data.mileage.to_f
+          @report_data_totals[date][:num_trips] += run_data.num_trips.to_i
+        end
+
+      end
+    end
+    apply_v2_response
+  end
+
+  def customer_totals_report
+    query_params = params[:query] || {start_date: Date.today.prev_month + 1, end_date: Date.today + 1}
+    @query = Query.new(query_params)
+    @active_vehicles = Vehicle.where(reportable: true).for_provider(current_provider_id).active.default_order
+
+    if params[:query]
+      @report_params = [["Provider", current_provider.name]]
+      @report_params << ["Date Range", "#{@query.start_date.strftime('%m/%d/%Y')} - #{@query.before_end_date.strftime('%m/%d/%Y')}"]
+
+      unless @query.vehicle_id.blank?
+        @vehicles = Vehicle.where(id: @query.vehicle_id)
+      else
+        @vehicles = @active_vehicles
+      end
+
+      lite_customers = LiteCustomer.for_provider(current_provider_id)
+      @total_customers = lite_customers.count
+      @total_senior_customers = lite_customers.sum("senior::int")
+      @total_disabled_customers = lite_customers.sum("disabled::int")
+
+      if query_params[:report_type] == 'summary'
+        @is_summary_report = true
+      else
+
+      end
+    end
+    apply_v2_response
+  end
+
+  def unique_rider_totals_report
+    query_params = params[:query] || {start_date: Date.today.prev_month + 1, end_date: Date.today + 1}
+    @query = Query.new(query_params)
+    @active_vehicles = Vehicle.where(reportable: true).for_provider(current_provider_id).active.default_order
+
+    if params[:query]
+      @report_params = [["Provider", current_provider.name]]
+      #@report_params << ["Date Range", "#{@query.start_date.strftime('%m/%d/%Y')} - #{@query.before_end_date.strftime('%m/%d/%Y')}"]
+
+      @lite_unique_riders = LiteUniqueRider.for_provider(current_provider_id).order(year: :desc)
+
+      if query_params[:report_type] == 'summary'
+        @is_summary_report = true
+      else
+
+      end
+    end
+    apply_v2_response
+  end
+
   # refresh run dropdown whenever date range is changed
   def get_run_list
     query_params = params[:query]
@@ -1447,7 +1705,6 @@ class ReportsController < ApplicationController
   def pdf_template
     report_name = @custom_report.name
     layout = report_name == 'manifest' ? 'portrait' : 'landscape'
-
     {
       pdf: "#{report_name}",
       disposition: 'attachment',

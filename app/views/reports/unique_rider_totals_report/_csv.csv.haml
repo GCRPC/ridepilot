@@ -1,0 +1,12 @@
+- # common
+= render 'reports/common_csv_header.csv.haml'
+
+- if @lite_unique_riders
+  - daily_report_headers = ["Year", "Number of Unique Riders"]
+
+  - unless @lite_unique_riders.blank?
+    = CSV.generate_line(daily_report_headers, {:row_sep => nil}).html_safe
+  - else
+    = CSV.generate_line(["No record"], {:row_sep => nil}).html_safe
+  - @lite_unique_riders.each do |trip|
+    = CSV.generate_line([trip.year, trip.num_unique_riders], {:row_sep => nil}).html_safe

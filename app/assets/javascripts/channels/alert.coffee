@@ -39,7 +39,7 @@ create_alert_channel = (provider_id) ->
     dismiss: (id, reader_id) ->
       @perform 'dismiss', id: id, reader_id: reader_id
 
-$ ->
-  if typeof current_provider_id != "undefined" 
-    create_alert_channel current_provider_id
+#$ ->
+#  if typeof current_provider_id != "undefined"
+#    create_alert_channel current_provider_id
   

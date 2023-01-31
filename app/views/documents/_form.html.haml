@@ -39,7 +39,7 @@
         / END .panel-body
       / END .panel
     .col-sm-12.col-md-6
-      .panel.panel-primary
+      -#.panel.panel-primary
         .panel-heading= translate_helper("document_associations_associables_heading")
         = render partial: "document_associations/document_association_for_document", locals: {document_associations: @document.document_associations}
       / END .panel

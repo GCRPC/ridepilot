@@ -45,7 +45,7 @@
 //= require jquery.timeago
 //= require OverlappingMarkerSpiderfier
 //= require bootstrap-toggle
-//= require cable
+//= require data-confirm-modal
 //= require_self
 
 function ISODateFormatToDateObject(str) {

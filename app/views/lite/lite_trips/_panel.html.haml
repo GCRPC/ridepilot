@@ -1,0 +1,14 @@
+:ruby
+  trips = @lite_trips
+
+.panel.expandable.panel-warning#lite_trips_panel
+  .panel-heading
+    .pull-right
+      - if can?(:new, Trip)
+        %span.dispatch-action
+          = link_to 'Add Trip', new_lite_lite_trip_path, class: "btn action-button"
+    %h3.panel-title
+      = render 'lite/lite_trips/panel_title'
+
+  .panel-body
+    = render 'lite/lite_trips/table', trips: trips

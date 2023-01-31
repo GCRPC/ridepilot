@@ -1,0 +1,19 @@
+%h2= translate_helper(:summary)
+%table.table.table-bordered
+  %thead
+    %tr
+      %th
+      %th Number of Customers
+      %th Number of Senior Customers
+      %th Number of Disabled Customers
+
+  %tbody
+    %tr
+      %td.text-right{style: 'width: 200px;'}
+        %b= translate_helper("total")
+      %td
+        %b= @total_customers.to_i
+      %td
+        %b= @total_senior_customers.to_i
+      %td
+        %b= @total_disabled_customers.to_i

@@ -25,6 +25,10 @@ class Provider < ApplicationRecord
   has_many :driver_requirement_templates, :dependent => :destroy
   has_many :documents, as: :documentable, dependent: :destroy, inverse_of: :documentable
   has_many :vehicle_inspections, :dependent => :destroy
+  has_many :lite_customers
+  has_many :lite_incidental_trips
+  has_many :lite_trips
+  has_many :lite_unique_riders
 
   has_one :address_upload_flag
 

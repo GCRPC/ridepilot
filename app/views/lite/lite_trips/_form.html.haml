@@ -1,0 +1,80 @@
+= render 'shared/highlight_active_tab_js', is_primary_nav: true, tab_class: 'trips'
+- edit_mode = :edit if !defined? edit_mode
+
+= form_for [:lite, @lite_trip], html: { class: 'trip_form' } do |f|
+  = f.hidden_field :provider_id
+  #page-header
+    %h1.page-title
+      - if edit_mode == :edit
+        Edit Trip
+      - else
+        New Trip
+    .action-buttons
+      = f.submit translate_helper(:save), class: 'btn action-button'
+      = link_to translate_helper(:cancel), trips_lite_index_path, class: "btn btn-default"
+  .row
+    .col-sm-12.col-md-6
+      .panel.panel-primary
+        .panel-body{style: 'padding: 5px;'}
+          .form-group
+            .form-label
+              = f.label :trip_date, translate_helper("date")
+            .form-field
+              .input-group.datepicker-icon
+                = f.text_field :trip_date,
+                    value: format_date(@lite_trip.trip_date),
+                    class: 'datepicker form-control',
+                    readonly: true
+                .input-group-btn
+                  %button.btn.btn-default{:type => "button"}
+                    = image_tag "calendar-clock.png"
+          .form-group
+            .form-label
+              = f.label :num_one_way_trips, 'Number of One Way Trips'
+            .form-field
+              = f.number_field :num_one_way_trips, required: true, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :num_senior_trips, 'Senior Trips'
+            .form-field
+              = f.number_field :num_senior_trips, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :num_disabled_trips, 'Disabled Trips'
+            .form-field
+              = f.number_field :num_disabled_trips, min: 0, size: 3, class: 'form-control'
+    .col-sm-12.col-md-6
+      .panel.panel-primary
+        .panel-body{style: 'padding: 5px;'}
+          .form-group
+            .form-label
+              = f.label :vehicle_id, 'Vehicle'
+            .form-field
+              = f.select :vehicle_id, options_from_collection_for_select( @vehicles, :id, :name, @lite_trip.vehicle_id ), { :class => 'form-control' }
+          .form-group
+            .form-label
+              = f.label :start_odometer, 'Start Odometer'
+            .form-field
+              = f.number_field :start_odometer, required: true, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :end_odometer, 'End Odometer'
+            .form-field
+              = f.number_field :end_odometer, required: true, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :lift_odometer, 'Lift Odometer'
+            .form-field
+              = f.number_field :lift_odometer, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :pre_trip_inspection, 'Pre-Trip Inspection'
+            .form-field
+              = f.check_box :pre_trip_inspection
+
+= render "shared/date_time_picker_javascript"
+:javascript
+  $(document).ready(function(){
+    makeDatePickers(".datepicker");
+    //$( ".datepicker" ).datepicker( "option", "dateFormat", "mm/dd/yy" );
+  });

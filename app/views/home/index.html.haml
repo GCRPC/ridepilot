@@ -5,19 +5,6 @@
     %li= link_to translate_helper("application_settings_link_text"), application_settings_path
   - if can? :manage, Provider
     %li= link_to translate_helper("providers_link_text"), providers_path
-  - if can? :manage, DriverRequirementTemplate
-    %li= link_to translate_helper("system_driver_requirement_templates_link_text"), driver_requirement_templates_path
-  - if can? :manage, VehicleRequirementTemplate
-    %li= link_to translate_helper("system_vehicle_requirement_templates_link_text"), vehicle_requirement_templates_path
-  - if can? :manage, MobilityCapacity
-    %li= link_to translate_helper("mobility_capacities_link_text"), mobility_capacities_path
-  - if can? :manage, LookupTable
-    %li= link_to translate_helper("lookup_tables_link_text"), lookup_tables_path
   - if can? :manage, Translation
     %li= link_to translate_helper("translation_engine_link_text"), translation_engine.translations_path
-
-- if !Rails.env.production? || ENV['HAS_RECURRING_TRIP_RUN_SCHDULING_BUTTON'] == 'true'
-  .col-sm-12
-    = link_to translate_helper("schedule_recurring_trips_runs"), schedule_recurring_path, class: 'btn action-button'
-
 

@@ -1,5 +1,5 @@
 .panel.panel-primary
-  .panel-heading= translate_helper("vehicle_maintenance_events_heading")
+  .panel-heading= translate_helper("vehicle_maintenance_events_heading_lite")
   %table#vehicle-maintenance-events-table.table.table-striped.table-condensed
     %thead
       %tr
@@ -16,10 +16,10 @@
     %tbody
       - if @readonly and @vehicle.vehicle_maintenance_events.empty?
         %tr
-          %td{:colspan => "8"}= translate_helper("vehicle_maintenance_events_empty")
+          %td{:colspan => "8"}= translate_helper("vehicle_maintenance_events_empty_lite")
       = render partial: 'vehicle_maintenance_events/vehicle_maintenance_event', collection: @vehicle.vehicle_maintenance_events.default_order
   - unless @readonly
     .panel-footer
       .clearfix
-        = link_to translate_helper("vehicle_maintenance_event_add_link_title"), new_vehicle_vehicle_maintenance_event_path(@vehicle), class: "btn action-button pull-right", remote: true
+        = link_to translate_helper("vehicle_maintenance_event_add_link_title_lite"), new_vehicle_vehicle_maintenance_event_path(@vehicle), class: "btn action-button pull-right", remote: true
 / END .panel

@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>
-    <%= content_for?(:title) ? yield(:title) : translate_helper("application_title") %>
+    <%= content_for?(:title) ? yield(:title) : translate_helper("application_title_lite") %>
   </title>
   <link href="https://fonts.googleapis.com/css?family=Barlow:400,400i,600,600i,800&amp;subset=latin-ext" rel="stylesheet">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
@@ -27,7 +27,7 @@
         </span>
         <span class="name">
           <a href='/'>
-           <%= translate_helper("site_title") %>
+           <%= translate_helper("site_title_lite") %>
           </a>
         </span>
       </span>
@@ -70,15 +70,9 @@
   <div id="crossbar">
     <div class="wrap selfclear">
       <ul id="primary-nav" class="selfclear">
-        <% if show_scheduling? %><li class="dispatchers"><%= link_to translate_helper("application_trips_runs_link_text"), dispatchers_path %></li><% end %>
-        <% if show_scheduling? %><li class="trips"><%= link_to translate_helper("application_trips_link_text"), trips_path %></li><% end %>
-        <% if show_scheduling? %><li class="runs"><%= link_to translate_helper("application_runs_link_text"), runs_path %></li><% end %>
-        <% if show_scheduling? %><li class="customers"><%= link_to translate_helper("application_customers_link_text"), customers_path %></li><% end %>
-        <% if show_scheduling? %><li class="drivers"><%= link_to translate_helper("application_drivers_link_text"), drivers_path %></li><% end %>
+        <% if show_scheduling? %><li class="trips"><%= link_to translate_helper("application_trips_link_text"), trips_lite_index_path %></li><% end %>
         <% if show_scheduling? %><li class="vehicles"><%= link_to translate_helper("application_vehicles_link_text"), vehicles_path %></li><% end %>
         <% if show_scheduling? %><li class="reports"><%= link_to translate_helper("application_reports_link_text"), reporting.reports_path %></li><% end %>
-        <% if current_provider.try(:cab_enabled?) %><li class="cab_trips"><%= link_to translate_helper("application_cabs_link_text"), cab_trips_path %></li><% end %>
-        <% if show_scheduling? %><li class="cad"><%= link_to translate_helper("application_cad_link_text"), ridepilot_cad_avl.cad_avl_path, target: :_blank %></li><% end %>
       </ul>
     </div><!-- /.wrap -->
   </div><!-- /#crossbar -->

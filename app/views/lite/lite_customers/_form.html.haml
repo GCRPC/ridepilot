@@ -1,0 +1,38 @@
+= render 'shared/highlight_active_tab_js', is_primary_nav: true, tab_class: 'trips'
+- edit_mode = :edit if !defined? edit_mode
+
+= form_for [:lite, @lite_customer], html: { class: 'trip_form' } do |f|
+  = f.hidden_field :provider_id
+  %h1.page-title
+    - if edit_mode == :edit
+      Edit Customer
+    - else
+      New Customer
+  .action-buttons
+    = f.submit "Submit", class: 'btn action-button'
+    = link_to translate_helper(:cancel), trips_lite_index_path, class: "btn btn-default"
+  .row
+    .col-sm-12.col-md-6
+      .panel.panel-primary
+        .panel-body{style: 'padding: 5px;'}
+          .form-group
+            .form-label
+              = f.label :first_name, 'First Name'
+            .form-field
+              = f.text_field :first_name, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :last_name, 'Last Name'
+            .form-field
+              = f.text_field :last_name, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :senior, 'Senior'
+            .form-field
+              = f.check_box :senior
+          .form-group
+            .form-label
+              = f.label :disabled, 'Disabled'
+            .form-field
+              = f.check_box :disabled
+    .col-sm-12.col-md-6

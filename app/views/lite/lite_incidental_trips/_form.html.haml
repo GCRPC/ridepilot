@@ -1,0 +1,49 @@
+= render 'shared/highlight_active_tab_js', is_primary_nav: true, tab_class: 'trips'
+- edit_mode = :edit if !defined? edit_mode
+
+= form_for [:lite, @lite_incidental_trip], html: { class: 'trip_form' } do |f|
+  = f.hidden_field :provider_id
+  %h1.page-title
+    New Incidental Trip
+  .action-buttons
+    = f.submit translate_helper(:save), class: 'btn action-button'
+    = link_to translate_helper(:cancel), trips_lite_index_path, class: "btn btn-default"
+  .row
+    .col-sm-12.col-md-6
+      .panel.panel-primary
+        .panel-body{style: 'padding: 5px;'}
+          .form-group
+            .form-label
+              = f.label :trip_date, translate_helper("date")
+            .form-field
+              .input-group.datepicker-icon
+                = f.text_field :trip_date,
+                    value: format_date(@lite_incidental_trip.trip_date),
+                    class: 'datepicker form-control',
+                    readonly: true
+                .input-group-btn
+                  %button.btn.btn-default{:type => "button"}
+                    = image_tag "calendar-clock.png"
+          .form-group
+            .form-label
+              = f.label :num_trips, 'Number of Incidental Trips'
+            .form-field
+              = f.number_field :num_trips, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :total_mileage, 'Total Mileage'
+            .form-field
+              = f.number_field :total_mileage, min: 0, size: 3, class: 'form-control'
+          .form-group
+            .form-label
+              = f.label :vehicle_id, 'Vehicle'
+            .form-field
+              = f.select :vehicle_id, options_from_collection_for_select( @vehicles, :id, :name, @lite_incidental_trip.vehicle_id), { :class => 'form-control' }
+    .col-sm-12.col-md-6
+
+= render "shared/date_time_picker_javascript"
+:javascript
+  $(document).ready(function(){
+    makeDatePickers(".datepicker");
+    //$( ".datepicker" ).datepicker( "option", "dateFormat", "mm/dd/yy" );
+  });

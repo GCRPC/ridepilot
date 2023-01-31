@@ -5,7 +5,7 @@
     %span.date-span
       = format_time_as_title_for_listing_day(@start_pickup_date) + " - " + format_time_as_title_for_listing_day(@end_pickup_date)
   .action-buttons
-    - if can? :create, Trip
+  -#   - if can? :create, Trip
       = link_to translate_helper("new_trip_link_text"), new_trip_path, :class=>'btn action-button'
     - if can? :create, RepeatingTrip
       = link_to translate_helper("new_repeating_trip_text"), new_repeating_trip_path, :class=>'btn action-button'
@@ -21,7 +21,7 @@
 - else
   .col-md-9
     .col-md-6{style: 'padding: 0px;'}
-      .table-action-buttons.cancel-selected-trips.dropdown
+      -#.table-action-buttons.cancel-selected-trips.dropdown
         %button.btn.btn-primary.dropdown-toggle{type: 'button', data: {toggle: 'dropdown'}} 
           =translate_helper(:change_selected_trips_result)
           %span.caret

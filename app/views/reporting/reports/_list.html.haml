@@ -2,16 +2,19 @@
 .row#reports_list
   .col-sm-6
     %h4
-      = translate_helper(:new_reports)
-    - v2_reports = @reports.select{|r| r[:version] == '2'}
-    = render 'reporting/reports/dropdown', reports: v2_reports, report_id: report_id
+      Report Name
+      -#= translate_helper(:new_reports)
+    - v2_reports = @reports.select{|r| r[:version] == '2' && (r[:name] == 'FTA 5310 Vehicle Report' || r[:name] == 'Vehicle Monthly Service Report' || r[:name] == 'Vehicle Monthly Service Report')}
+    - v3_reports = @reports.select{|r| r[:version] == '3'}
+    - v3_reports = v3_reports.concat v2_reports
+    = render 'reporting/reports/dropdown', reports: v3_reports, report_id: report_id
 
   .col-sm-6
-    %h4
-      = translate_helper(:previous_reports)
+-#    %h4
+-#      = translate_helper(:previous_reports)
     
-    - v1_reports = @reports.select{|r| r[:version] == '1'}
-    = render 'reporting/reports/dropdown', reports: v1_reports, report_id: report_id
+-#    - v1_reports = @reports.select{|r| r[:version] == '1'}
+-#    = render 'reporting/reports/dropdown', reports: v1_reports, report_id: report_id
 
 
   

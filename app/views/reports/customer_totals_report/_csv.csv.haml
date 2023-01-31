@@ -1,0 +1,8 @@
+- # common
+= render 'reports/common_csv_header.csv.haml'
+
+- if @vehicles
+  - daily_report_headers = ["Number of Customers", "Number of Senior Customers", "Number of Disabled Customers"]
+
+  = CSV.generate_line(daily_report_headers, {:row_sep => nil}).html_safe
+  = CSV.generate_line([@total_customers.to_i, @total_senior_customers.to_i, @total_disabled_customers.to_i], {:row_sep => nil}).html_safe

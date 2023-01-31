@@ -345,6 +345,13 @@ namespace :ridepilot do
     puts 'Finished seeding supporting version 2 custom reports'
   end
 
+  desc 'Add new custom reports for Lite'
+  task :add_v3_lite_custom_reports => :environment do
+    seed_file = File.join(Rails.root, 'db', 'tasks', 'seed_v3_lite_custom_reports.rb')
+    load(seed_file) if File.exist?(seed_file)
+    puts 'Finished seeding version 3 lite custom reports'
+  end
+
   desc 'Remove provider-specific capacity types'
   task :remove_provider_specific_capacity_types => :environment do
     ct_table = ProviderLookupTable.find_by_name "capacity_types"

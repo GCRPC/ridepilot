@@ -162,6 +162,8 @@ GEM
     crass (1.0.4)
     css_splitter (0.4.6)
       sprockets (>= 2.0.0)
+    data-confirm-modal (1.6.3)
+      railties (>= 3.0)
     data_migrate (5.0.2)
       rails (>= 4.2)
     database_cleaner (1.7.0)
@@ -282,7 +284,7 @@ GEM
     mime-types (3.2.2)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2018.0812)
-    mimemagic (0.3.2)
+    mimemagic (0.3.2), github: 'mimemagicrb/mimemagic', ref: '3543363026121ee28d98dfce4cb6366980c055ee'
     mini_mime (1.0.1)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
@@ -498,7 +500,7 @@ GEM
       chronic (>= 0.6.3)
     wicked_pdf (1.1.0)
     will_paginate (3.1.6)
-    wkhtmltopdf-binary (0.12.4)
+    wkhtmltopdf-binary (0.12.5)
     xpath (3.1.0)
       nokogiri (~> 1.8)
 
@@ -519,6 +521,7 @@ DEPENDENCIES
   capybara
   coffee-rails
   css_splitter
+  data-confirm-modal
   data_migrate
   database_cleaner
   devise
@@ -580,7 +583,7 @@ DEPENDENCIES
   whenever
   wicked_pdf
   will_paginate
-  wkhtmltopdf-binary
+  wkhtmltopdf-binary (= 0.12.5)
 
 RUBY VERSION
    ruby 2.4.5p335

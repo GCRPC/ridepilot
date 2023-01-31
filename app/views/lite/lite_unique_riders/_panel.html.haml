@@ -1,0 +1,11 @@
+:ruby
+
+.panel.expandable.panel-warning#lite_unique_riders_panel
+  .panel-heading
+    %h3.panel-title
+      = render 'lite/lite_unique_riders/panel_title'
+
+  .panel-body
+    = render 'lite/lite_unique_riders/form'
+    .h4
+      = translate_helper("unique_riders_lite_subtitle")

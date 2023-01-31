@@ -7,7 +7,7 @@ Rails.application.routes.draw do
     mount RidepilotCadAvl::Engine => "/ridepilot_cad_avl"
     mount ActionCable.server => '/cable'
 
-    root :to => "dispatchers#index"
+    root :to => "trips_lite#index"
 
     get "admin", to: "home#index"
     get "schedule_recurring", to: "home#schedule_recurring"
@@ -266,6 +266,29 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :trips_lite, only: [:index] do
+      collection do
+      end
+    end
+
+    namespace :lite do
+      resources :lite_trips do
+      end
+      resources :lite_incidental_trips do
+      end
+      match "/lite_customers/destroy_all", to: "lite_customers#destroy_all", via: [:delete], as: :destroy_all_lite_customers
+      resources :lite_customers do
+        collection do
+          delete :destroy_all
+          get :autocomplete
+          get :found
+          get :search
+        end
+      end
+      resources :lite_unique_riders do
+      end
+    end
+
     resources :dispatchers,only: [:index] do
       collection do
         post :schedule
@@ -344,7 +367,8 @@ Rails.application.routes.draw do
       "export_trips_in_range",  "inactive_driver_status_report", "ineligible_customer_status_report", "manifest", 
       "missing_data_report", "monthlies", "ntd", "pre_run_inspections", "provider_common_location_report", "provider_service_productivity_report", 
       "service_summary", "show_runs_for_verification", "show_trips_for_verification", "update_runs_for_verification", 
-      "update_trips_for_verification", "vehicle_monthly_service_report", "vehicle_report", "vehicle_5310_report", "vehicles_monthly"].each do |action|
+      "update_trips_for_verification", "vehicle_monthly_service_report", "vehicle_report", "vehicle_5310_report", "vehicles_monthly",
+       "one_way_trips_report","daily_report","incidental_trips_report","customer_totals_report","unique_rider_totals_report"].each do |action|
         #get action, action: action
         get "#{action}/:id", action: action
       end

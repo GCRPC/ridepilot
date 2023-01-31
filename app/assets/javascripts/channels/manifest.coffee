@@ -10,5 +10,5 @@ create_manifest_channel = () ->
       # Called when there's incoming data on the websocket for this channel
 
 $ ->
-  if typeof current_provider_id != "undefined" 
-    create_manifest_channel()
+#  if typeof current_provider_id != "undefined"
+#    create_manifest_channel()

@@ -33,14 +33,6 @@
         = f.text_field :vin, class: "form-control", disabled: @readonly
     .form-group
       .form-label
-        = f.label :vehicle_type_id, translate_helper("vehicle_form_vehicle_type_label")
-      .form-field
-        = f.collection_select :vehicle_type_id, VehicleType.for_provider(current_provider_id).default_order, :id, :name, { include_blank: true }, { class: "form-control", disabled: @readonly }
-        .vehicle-capacity-configurations
-          - if @vehicle.vehicle_type && @vehicle.vehicle_type.vehicle_capacity_configurations.any?
-            = render 'vehicle_capacity_configurations/list', vehicle_capacity_configurations: @vehicle.vehicle_type.vehicle_capacity_configurations
-    .form-group
-      .form-label
         = f.label :reportable, translate_helper("vehicle_form_reportable_label")
       .form-field
         = f.select :reportable, [["Yes", true], ["No", false]], {:selected => @vehicle.reportable }, class: "form-control", disabled: @readonly
@@ -66,6 +58,13 @@
       .form-field
         %p.form-control-static
           = number_with_delimiter @vehicle.last_odometer_reading
+          mi.
+    .form-group
+      .form-label
+        = label_tag nil, "Last Reported Lift Odometer"
+      .form-field
+        %p.form-control-static
+          = number_with_delimiter @vehicle.last_lift_odometer_reading_lite
           mi.
 
 - if !@readonly

@@ -1,0 +1,30 @@
+%h2= translate_helper(:summary)
+%table.table.table-bordered
+  %thead
+    %tr
+      %th Date
+      %th One-Way Trips
+      %th Seniors
+      %th Disabled
+      %th Vehicle
+      %th Start Odometer
+      %th End Odometer
+      %th Lift Odometer
+      %th Pre-Trip
+
+  %tbody
+    - @lite_trips.each do |trip|
+      %tr{data: {trip_id: trip.id}}
+        %td= format_date trip.trip_date
+        %td= trip.num_one_way_trips
+        %td= trip.num_senior_trips
+        %td= trip.num_disabled_trips
+        %td= trip.vehicle ? trip.vehicle.name : translate_helper('no_vehicle')
+        %td= trip.start_odometer
+        %td= trip.end_odometer
+        %td= trip.lift_odometer
+        %td= check_box_tag 'pre_trip_inspection', '1', trip.pre_trip_inspection, :disabled => true
+
+
+
+

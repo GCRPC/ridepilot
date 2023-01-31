@@ -1,0 +1,59 @@
+:ruby
+  customers = @lite_customers
+
+
+.panel.expandable.panel-warning#lite_trips_panel
+  .panel-heading
+    .pull-right
+      - if can?(:new, Trip)
+        %span.dispatch-action
+          = link_to 'New', new_lite_lite_customer_path, class: "btn action-button"
+      - if is_admin_or_system_admin?
+        %span.dispatch-action
+          = button_tag 'Delete All', class: 'btn action-button', :id=>:delete_all,
+            :disabled => @lite_customers.empty?
+      = form_tag found_lite_lite_customers_path, :class=>'customer-search', :method=>:get do
+        %label{for:"customer_id"}
+        = autocomplete_field_tag 'customer_name', params[:term], autocomplete_lite_lite_customers_path, :size => 30, :delay => 500, :id_element => "#customer_id", "submit-buttons" => "#show_details", placeholder: "Name"
+        = hidden_field_tag 'customer_id'
+        = submit_tag translate_helper("search"), :id=>:show_details
+    %h3.panel-title
+      = render 'lite/lite_customers/panel_title'
+
+  .panel-body
+    = render 'lite/lite_customers/table', customers: customers
+    .h4
+      This section is not required.
+
+:javascript
+  $(document).ready(function(){
+    var link = $('#delete_all');
+      link.on('click', function(event) {
+        event.preventDefault();
+
+        dataConfirmModal.confirm({
+          title: 'Delete All Customers',
+          text: 'Are you sure you want to delete all customers? Please enter your password to confirm.',
+          modalClass: 'lite_delete_all_modal',
+          verify: ' ',
+          verifyRegexp: '[\s\S]*',
+          verifyRegexpCaseInsensitive: 'true',
+          verify_text: 'Type your password to confirm',
+
+          onConfirm: function() {
+            $.ajax({
+              complete:function(request){},
+              data:'password='+ $('.modal input').val(),
+              dataType:'script',
+              type:'delete',
+              url: 'lite/lite_customers/destroy_all',
+                statusCode: {
+                  401: function() {
+                    alert( "Incorrect password entered. Could not authorize Delete All Customers." );
+                  }
+                }
+            })
+          }
+        });
+      });
+    });

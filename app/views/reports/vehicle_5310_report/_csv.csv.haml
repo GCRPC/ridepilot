@@ -1,9 +1,9 @@
 - # common
 = render 'reports/common_csv_header.csv.haml'
 
-= CSV.generate_line(['Number of Passengers Summary', 'Count'], {:row_sep => nil}).html_safe
+= CSV.generate_line(['Number of Trips Summary', 'Count'], {:row_sep => nil}).html_safe
+= CSV.generate_line(['One-Way', @total_one_way_passengers_count], {:row_sep => nil}).html_safe
 = CSV.generate_line(['Senior', @total_senior_passengers_count], {:row_sep => nil}).html_safe
-= CSV.generate_line(['Low Income', @total_low_income_passengers_count], {:row_sep => nil}).html_safe
 = CSV.generate_line(['Disabled', @total_disabled_passengers_count], {:row_sep => nil}).html_safe
 = CSV.generate_line(['Total', @total_passengers_count], {:row_sep => nil}).html_safe
 
@@ -28,9 +28,9 @@
       - if !vehicle.active_for_date?(Date.today)  
         = CSV.generate_line(['Inactivated Reason', vehicle.active_status_changed_reason], {:row_sep => nil}).html_safe  
 
-      = CSV.generate_line(['Number of Passengers', 'Count'], {:row_sep => nil}).html_safe
+      = CSV.generate_line(['Number of Trips', 'Count'], {:row_sep => nil}).html_safe
+      = CSV.generate_line(['One-Way', @one_way_passengers_count[vehicle.id]], {:row_sep => nil}).html_safe
       = CSV.generate_line(['Senior', @senior_passengers_count[vehicle.id]], {:row_sep => nil}).html_safe
-      = CSV.generate_line(['Low Income', @low_income_passengers_count[vehicle.id]], {:row_sep => nil}).html_safe
       = CSV.generate_line(['Disabled', @disabled_passengers_count[vehicle.id]], {:row_sep => nil}).html_safe
       = CSV.generate_line(['Total', @passengers_count[vehicle.id]], {:row_sep => nil}).html_safe
 

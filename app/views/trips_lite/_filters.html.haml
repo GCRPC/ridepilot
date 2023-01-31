@@ -1,0 +1,57 @@
+.panel.panel-primary.filters-panel#lite_trip_filter_panel
+  .panel-heading
+    %h3.panel-title
+      Filter Options
+  .panel-body
+    = form_for :trip_filters, url: trips_lite_index_path, html: { :id => "trip_filter_form" }, :method => :get do |f|
+      .filter-body
+        .col-sm-12
+          = f.label :start, 'Start Date'
+          .input-group.datepicker-icon
+            = f.text_field :start, :value => format_time_for_listing_day(@start_pickup_date), class: 'datepicker form-control', readonly: true
+            .input-group-btn
+              %button.btn.btn-default{:type => "button"}
+                = image_tag "calendar-clock.png"
+        .col-sm-12
+          = f.label :end, 'End Date'
+          .input-group.datepicker-icon
+            = f.text_field :end, :value => format_time_for_listing_day(@end_pickup_date), class: 'datepicker form-control', readonly: true
+            .input-group-btn
+              %button.btn.btn-default{:type => "button"}
+                = image_tag "calendar-clock.png"
+        .col-sm-12
+          = f.label :vehicle_id, translate_helper(:vehicle)
+          = f.select :vehicle_id, options_from_collection_for_select( @vehicles, :id, :name, session[:runs_vehicle_id]), {:include_blank => translate_helper(:all) }, { :class => 'form-control' }
+      .btns.filter-buttons
+        = f.submit  'Submit', id: 'runTripFilters', class: 'btn action-button', role: 'button', :style => "margin-top: 10px;"
+
+= render "shared/date_time_picker_javascript"
+:javascript
+  $(document).ready(function(){
+    makeDatePickers();
+
+    $('#resetTripFilters').on('click', function() {
+      $('#trip_filter_form .filter-body input').val('');
+      $('#trip_filter_form .filter-body select').val('');
+
+      $('#trip_filter_form').submit();
+    });
+
+    function update_run_filters() {
+      $.ajax({
+        url: "#{update_run_filters_trips_path}.js",
+        data: {
+          trip_filters: {
+            start: $('#trip_filters_start').val(),
+            end: $('#trip_filters_end').val()
+          }
+        }
+      });
+    }
+
+    $('#trip_filters_start, #trip_filters_end').on('change', function() {
+      update_run_filters();
+    });
+  });
+      
+    

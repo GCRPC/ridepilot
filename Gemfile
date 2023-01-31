@@ -128,6 +128,8 @@ gem 'redis-rails'
 gem 'rubyXL'
 # Data migration
 gem 'data_migrate'
+# RidePilot Lite
+gem 'data-confirm-modal'
 
 group :production do
   gem 'exception_notification'
@@ -137,7 +139,7 @@ group :integration, :qa, :production do
   gem 'rails_12factor'
   gem 'unicorn'
   gem 'rack-timeout'
-  gem 'wkhtmltopdf-binary'
+  gem 'wkhtmltopdf-binary', '=0.12.5'
 end
 
 group :test, :development do

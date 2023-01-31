@@ -23,6 +23,8 @@ class Vehicle < ApplicationRecord
   has_many :documents, as: :documentable, dependent: :destroy, inverse_of: :documentable
   has_many :runs, inverse_of: :vehicle # TODO add :dependent rule
   has_many :trips, through: :runs
+  has_many :lite_trips
+  has_many :lite_incidental_trips
   has_many :vehicle_maintenance_events, dependent: :destroy, inverse_of: :vehicle
   has_many :vehicle_warranties, dependent: :destroy, inverse_of: :vehicle
   has_many :vehicle_compliances, dependent: :delete_all, inverse_of: :vehicle
@@ -68,13 +70,39 @@ class Vehicle < ApplicationRecord
   end
 
   def last_odometer_reading
-    associated_runs = runs.where().not(end_odometer: nil)
+    #associated_runs = runs.where().not(end_odometer: nil)
+    associated_runs = lite_trips.where().not(end_odometer: nil).order('trip_date, end_odometer')
     # if no existing run has logged odometer, then use initial mileage
     last_odometer = if associated_runs.empty?
       initial_mileage
     else
       associated_runs.last.try(:end_odometer)
     end
+
+    last_odometer.to_i
+  end
+
+  def last_odometer_reading_lite
+    associated_runs = lite_trips.where().not(end_odometer: nil).order(:trip_date)
+    # if no existing run has logged odometer, then use initial mileage
+    last_odometer = if associated_runs.empty?
+                      initial_mileage
+                    else
+                      associated_runs.last.try(:end_odometer)
+                    end
+
+    last_odometer.to_i
+  end
+
+  def last_lift_odometer_reading_lite
+    #associated_runs = runs.where().not(end_odometer: nil)
+    associated_runs = lite_trips.where().not(lift_odometer: nil).order('trip_date, lift_odometer')
+    # if no existing run has logged odometer, then use initial mileage
+    last_odometer = if associated_runs.empty?
+
+                    else
+                      associated_runs.last.try(:lift_odometer)
+                    end
 
     last_odometer.to_i
   end

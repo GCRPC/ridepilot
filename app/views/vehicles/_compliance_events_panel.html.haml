@@ -1,6 +1,6 @@
 .panel.panel-primary
   .panel-heading
-    = translate_helper("vehicle_maintenance_compliances_heading")
+    = translate_helper("vehicle_maintenance_compliances_heading_lite")
     .checkbox.pull-right
       %label
         %input#show_all_compliances{type: 'checkbox'}
@@ -9,7 +9,7 @@
     .form-label
       %label= translate_helper("vehicle_maintenance_schedule_type_label")
     .form-field
-      - if @vehicle.vehicle_maintenance_schedule_type.present?
+      - if @vehicle.vehicle_maintenance_schedule_type.present? && @readonly
         = @vehicle.vehicle_maintenance_schedule_type.name 
       - elsif !@readonly
         = f.collection_select :vehicle_maintenance_schedule_type_id, VehicleMaintenanceScheduleType.for_provider(current_provider_id).default_order, :id, :name, { include_blank: true }, { class: "form-control", id: "vehicle_maintenance_schedule_type" }

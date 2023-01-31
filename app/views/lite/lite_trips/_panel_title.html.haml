@@ -1,0 +1,9 @@
+= translate_helper("unassigned_trips")
+%span.trips-quantity.header-info
+  - stats = []
+  - total_count = @lite_trips.count
+  - stats << "#{total_count} total" if total_count > 0
+  - if total_count > 0
+    = "#{stats.join(', ')}"
+  - else 
+    = translate_helper(:empty_trips)

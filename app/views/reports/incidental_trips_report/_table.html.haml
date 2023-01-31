@@ -1,0 +1,49 @@
+%h2= translate_helper(:summary)
+%table.table.table-bordered
+  %thead
+    %tr
+      %th= translate_helper(:vehicle_form_name_label)
+      %th= translate_helper(:mileage)
+      %th Number of Incidental Trips
+
+  %tbody
+    - @service_vehicles.each do |vehicle|
+      %tr
+        %td{style: 'width: 200px;'}= vehicle.name
+        %td= @miles_by_vehicle[vehicle.id].to_f
+        %td= @trips_count[vehicle.id].to_i
+    %tr
+      %td.text-right{style: 'width: 200px;'}
+        %b= translate_helper("total") + " (#{@total_vehicle_count.to_i} vehicles)"
+      %td
+        %b= @total_vehicle_miles.to_f
+      %td
+        %b= @total_incidental_trips.to_i
+
+- if @run_dates
+  - @run_dates.each do |date|
+    - next if @report_data[date].blank?
+    %h3= format_date(date)
+    %table.table.table-bordered
+      %thead
+        %tr
+          %th{style: 'width: 200px;'}= translate_helper(:vehicle_form_name_label)
+          %th= translate_helper(:mileage)
+          %th Number of Incidental Trips
+      %tbody
+        - @vehicles_basic_data.each do | vehicle_id, vehicle_name |
+          - next if @report_data[date][vehicle_id].blank?
+          - vehicle_data = @report_data[date][vehicle_id]
+          %tr
+            %td{style: 'width: 200px;'}= vehicle_name
+            %td= format_float_number vehicle_data[:mileage]
+            %td= vehicle_data[:num_trips]
+        %tr
+          %td.text-right{style: 'width: 200px;'}
+            %b= translate_helper(:total)
+          - total_data = @report_data_totals[date]
+          %td= format_float_number total_data[:mileage]
+          %td= total_data[:trips_count]
+
+
+

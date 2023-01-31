@@ -6,7 +6,6 @@
       %th= translate_helper(:mileage)
       %th= translate_helper(:number_of_trips)
       %th= translate_helper(:total_passengers)
-      %th= translate_helper(:total_hours_driven)
 
   %tbody
     - @service_vehicles.each do |vehicle|
@@ -15,8 +14,6 @@
         %td= @miles_by_vehicle[vehicle.id].to_f
         %td= @trips_count[vehicle.id].to_i
         %td= @passengers_count[vehicle.id].to_i
-        - vehicle_hours = @vehicle_hours[vehicle.id]
-        %td= format_float_number(vehicle_hours.to_f / 3600.0)
           
     %tr
       %td.text-right{style: 'width: 200px;'}
@@ -24,11 +21,9 @@
       %td
         %b= @total_vehicle_miles.to_f
       %td
-        %b= @total_trips_count.to_i
+        %b= @total_one_way_trips.to_i
       %td  
         %b= @total_passengers_count.to_i
-      %td  
-        %b= format_float_number(@total_vehicle_hours)
 
 - if @run_dates
   - @run_dates.each do |date|
@@ -41,8 +36,6 @@
           %th= translate_helper(:start_odometer)
           %th= translate_helper(:end_odometer)
           %th= translate_helper(:mileage)
-          %th= "#{translate_helper(:run_distance_revenue_miles)} (approx)"
-          %th= "#{translate_helper(:run_distance_non_revenue_miles)} (approx)"
           %th= translate_helper(:number_of_trips)
       %tbody
         - @vehicles_basic_data.each do | vehicle_id, vehicle_name |
@@ -53,9 +46,7 @@
             %td= format_float_number vehicle_data[:beginning_mileage]
             %td= format_float_number vehicle_data[:ending_mileage]
             %td= format_float_number vehicle_data[:mileage]
-            %td= format_float_number vehicle_data[:revenue_miles_sum]
-            %td= format_float_number vehicle_data[:non_revenue_miles_sum]
-            %td= vehicle_data[:trips_count]
+            %td= vehicle_data[:num_one_way_trips]
         %tr
           %td.text-right{style: 'width: 200px;'}
             %b= translate_helper(:total)
@@ -63,8 +54,6 @@
           %td
           %td
           %td= format_float_number total_data[:mileage]
-          %td= format_float_number total_data[:revenue_miles_sum]
-          %td= format_float_number total_data[:non_revenue_miles_sum]
-          %td= total_data[:trips_count]
+          %td= total_data[:num_one_way_trips]
 
 

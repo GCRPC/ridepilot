@@ -32,16 +32,19 @@ class NtdReport
 
   def get_base_data
     @runs = Run.complete.for_provider(@provider.try(:id)).for_date_range(@start_date, @end_date)
-    @weekday_runs = @runs.where("extract(dow from date) in (?)", (1..5).to_a)
-    @sat_runs = @runs.where("extract(dow from date) = ?", 6)
-    @sun_runs = @runs.where("extract(dow from date) = ?", 0)
+    @weekday_runs = @runs.where("extract(dow from (date at time zone 'UTC') at time zone ?) in (?)", Time.zone.tzinfo.identifier, (1..5).to_a)
+    @sat_runs = @runs.where("extract(dow from (date at time zone 'UTC') at time zone ?) = ?", Time.zone.tzinfo.identifier, 6)
+    @sun_runs = @runs.where("extract(dow from (date at time zone 'UTC') at time zone ?) = ?", Time.zone.tzinfo.identifier, 0)
 
     @trips = Trip.for_provider(@provider.try(:id)).completed.joins(:run, :funding_source)
       .where("runs.complete = ?", true).for_date_range(@start_date, @end_date)
       .where(funding_sources: {ntd_reportable: true})
-    @weekday_trips = @trips.where("extract(dow from pickup_time) in (?)", (1..5).to_a)
-    @sat_trips = @trips.where("extract(dow from pickup_time) = ?", 6)
-    @sun_trips = @trips.where("extract(dow from pickup_time) = ?", 0)
+    @weekday_trips = @trips.where("extract(dow from (pickup_time at time zone 'UTC') at time zone ?) in (?)", 
+      Time.zone.tzinfo.identifier, (1..5).to_a)
+    @sat_trips = @trips.where("extract(dow from (pickup_time at time zone 'UTC') at time zone ?) = ?", 
+      Time.zone.tzinfo.identifier, 6)
+    @sun_trips = @trips.where("extract(dow from (pickup_time at time zone 'UTC') at time zone ?) = ?", 
+      Time.zone.tzinfo.identifier, 0)
   end
 
   def process_periods_of_service
@@ -71,6 +74,7 @@ class NtdReport
   end
 
   def process_operations
+    #@num_max_operated_vehicles = @trips.group("extract(month from (runs.date at time zone 'UTC') at time zone ?)", Time.zone.tzinfo.identifier).count("distinct(runs.vehicle_id)")
     @num_max_operated_vehicles = @trips.group("extract(month from runs.date)").count("distinct(runs.vehicle_id)")
 
     @num_unlinked_passenger_weekday_trips = sum_monthly_trip_size @weekday_trips
@@ -208,15 +212,18 @@ class NtdReport
   end
 
   def sum_monthly_trip_size(trips)
+    #trips.group("extract(month from (pickup_time at time zone 'UTC') at time zone ?)", Time.zone.tzinfo.identifier).sum("customer_space_count + guest_count + attendant_count")
     trips.group("extract(month from pickup_time)").sum("customer_space_count + guest_count + attendant_count")
   end
 
   def count_monthly_days_operated(trips)
+    #trips.group("extract(month from (runs.date at time zone 'UTC') at time zone ?)", Time.zone.tzinfo.identifier).count("distinct(runs.date)")
     trips.group("extract(month from runs.date)").count("distinct(runs.date)")
   end
 
   def monthly_miles_hours(trips)
     run_ids = trips.pluck(:run_id).uniq
+    #runs_rel = Run.where(id: run_ids).joins(:run_distance).group("extract(month from (runs.date at time zone 'UTC') at time zone ?)", Time.zone.tzinfo.identifier)
     runs_rel = Run.where(id: run_ids).joins(:run_distance).group("extract(month from runs.date)")
     {
       total_miles: runs_rel.sum("run_distances.ntd_total_miles"),

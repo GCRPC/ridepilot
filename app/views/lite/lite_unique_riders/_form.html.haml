@@ -1,0 +1,13 @@
+= render 'shared/highlight_active_tab_js', is_primary_nav: true, tab_class: 'trips'
+- edit_mode = :edit if !defined? edit_mode
+
+= form_for [:lite, @lite_unique_rider], html: { class: 'trip_form' } do |f|
+  = f.hidden_field :provider_id
+  #page-header
+    .form-group
+      .form-label
+        = f.label :num_unique_riders, 'Number of Unique Riders'
+      .form-field
+        = f.number_field :num_unique_riders, required: true, min: 0, size: 3, class: 'form-control'
+    .action-buttons
+      = f.submit "Submit", class: 'btn action-button'

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_03_02_211128) do
+ActiveRecord::Schema.define(version: 202103162114206) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "fuzzystrmatch"
@@ -514,6 +514,55 @@ ActiveRecord::Schema.define(version: 2019_03_02_211128) do
     t.index ["address_id"], name: "index_itineraries_on_address_id"
     t.index ["run_id"], name: "index_itineraries_on_run_id"
     t.index ["trip_id"], name: "index_itineraries_on_trip_id"
+  end
+
+  create_table "lite_customers", force: :cascade do |t|
+    t.string "first_name"
+    t.string "last_name"
+    t.boolean "senior"
+    t.boolean "disabled"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "provider_id", default: 1
+    t.index ["provider_id"], name: "index_lite_customers_on_provider_id"
+  end
+
+  create_table "lite_incidental_trips", force: :cascade do |t|
+    t.date "trip_date"
+    t.integer "num_trips"
+    t.integer "total_mileage"
+    t.bigint "vehicle_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "provider_id", default: 1
+    t.index ["provider_id"], name: "index_lite_incidental_trips_on_provider_id"
+    t.index ["vehicle_id"], name: "index_lite_incidental_trips_on_vehicle_id"
+  end
+
+  create_table "lite_trips", force: :cascade do |t|
+    t.date "trip_date"
+    t.integer "num_one_way_trips"
+    t.integer "num_senior_trips"
+    t.integer "num_disabled_trips"
+    t.bigint "vehicle_id"
+    t.integer "start_odometer"
+    t.integer "end_odometer"
+    t.integer "lift_odometer"
+    t.boolean "pre_trip_inspection"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "provider_id", default: 1
+    t.index ["provider_id"], name: "index_lite_trips_on_provider_id"
+    t.index ["vehicle_id"], name: "index_lite_trips_on_vehicle_id"
+  end
+
+  create_table "lite_unique_riders", force: :cascade do |t|
+    t.integer "year"
+    t.integer "num_unique_riders"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "provider_id", default: 1
+    t.index ["provider_id"], name: "index_lite_unique_riders_on_provider_id"
   end
 
   create_table "locales", id: :serial, force: :cascade do |t|
@@ -1405,6 +1454,10 @@ ActiveRecord::Schema.define(version: 2019_03_02_211128) do
   add_foreign_key "chat_read_receipts", "runs"
   add_foreign_key "gps_locations", "providers"
   add_foreign_key "gps_locations", "runs"
+  add_foreign_key "lite_customers", "providers"
+  add_foreign_key "lite_incidental_trips", "providers"
+  add_foreign_key "lite_trips", "providers"
+  add_foreign_key "lite_unique_riders", "providers"
   add_foreign_key "message_templates", "providers"
   add_foreign_key "messages", "drivers"
   add_foreign_key "messages", "runs"
